@@ -15,10 +15,18 @@ typedef struct _book {
 	int issueYear; // Год выпуска int, потому что существуют книги, написанные до нашей эры
 	char* publishingHouse; // Издательство
 	float readersScore; // Оценка читателей по шкале от 1 до 10, может быть дробной, к примеру 5,5
-	size_t price; // Текущая цена книги
+	unsigned price; // Текущая цена книги
 	char* genre; // Жанр повествования
 	char* shortDescription; // Краткое описание
+	unsigned id; // Уникальный идентификатор книги (для поиска клонов и удаления)
 } Book;
+
+typedef struct _AVL_Tree_Node {
+	Book* currentBook; // Сохраненная в текущем элементе книга
+	struct _AVL_Tree_Node* left; // Левое поддерево
+	struct _AVL_Tree_Node* right; // Правое поддерево
+	unsigned char height; // Высота (по умолчанию 1)
+} treeNode;
 
 // Выводит справку для пользователя (описание функций программы и как юзер может ими воспользоваться)
 void usage();
