@@ -21,8 +21,17 @@ typedef struct _book {
 	unsigned id; // Уникальный идентификатор книги (для поиска клонов и удаления)
 } Book;
 
+typedef struct _stackNode {
+	Book* currentBook;
+	struct _stackNode* nextNode;
+} bookStackNode;
+
+// Дерево, где будут храниться все книги
 typedef struct _AVL_Tree_Node {
-	Book* currentBook; // Сохраненная в текущем элементе книга
+	/* Вершина стека, в котором хранятся книги. В каждом элементе дерева может храниться больше одной книги для обработки
+	* коллизий (совпадений) - например, все книги одного автора или одного года выпуска будут храниться в одном элементе
+	соответствующего дерева */
+	bookStackNode* stackTopPtr;
 	struct _AVL_Tree_Node* left; // Левое поддерево
 	struct _AVL_Tree_Node* right; // Правое поддерево
 	unsigned char height; // Высота (по умолчанию 1)
