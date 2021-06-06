@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <Windows.h>
+#include <malloc.h>
+#include <stdbool.h>
 
 //  одировка дл€ консоли, чтобы корректно выводились кириллические символы без дополнительных манипул€ций
 #define RUS_ENCODING 1251
@@ -36,6 +38,10 @@ typedef struct _AVL_Tree_Node {
 	struct _AVL_Tree_Node* right; // ѕравое поддерево
 	unsigned char height; // ¬ысота (по умолчанию 1)
 } treeNode;
+
+/* ѕоскольку дл€ быстрого поиска и вставки хранение информации о каждой книге осуществл€етс€ в разных деревь€х, пользователю нужно будет
+* выбрать, по какому из параметров он ищет книгу (название, автор, год выпуска и так далее) */
+enum searchTypes {SEARCH_BY_TITLE, SEARCH_BY_AUTHOR, SEARCH_BY_YEAR, SEARCH_BY_PRICE, SEARCH_BY_GENRE, SEARCH_BY_SCORE, SEARCH_BY_PUBLISHING_HOUSE};
 
 // ¬ыводит справку дл€ пользовател€ (описание функций программы и как юзер может ими воспользоватьс€)
 void usage();
