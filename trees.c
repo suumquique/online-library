@@ -1,5 +1,30 @@
 #include "main.h"
 
+/*ƒеревь€, отсортированные по различным пол€м информации о книге (автор, название, прайс и так далее). ¬сего параметров
+дл€ сортировки 7 (ѕо краткому содержанию и id сортировки нет), следовательно, всего семь деревьев.
+ѕри добавлении или удалении книги она добавл€етс€ или удал€етс€ соответственно изо всех семи деревьев, но в
+результате столь неэкономного использовани€ пам€ти получаетс€ крайне оптимальный поиск.*/
+treeNode** trees[7] = { 0 };
+
+void insertInAllTrees(Book* bookPtr) {
+	for (size_t searchType = 0; searchType < SEARCH_FIELDS_NUMBER; searchType++) {
+		insert(trees[searchType], bookPtr, searchType);
+	}
+}
+
+void deleteFromAllTrees(Book* bookPtr) {
+	for (size_t searchType = 0; searchType < SEARCH_FIELDS_NUMBER; searchType++) {
+		delete(trees[searchType], bookPtr, searchType);
+	}
+
+	free(bookPtr->author);
+	free(bookPtr->title);
+	free(bookPtr->genre);
+	free(bookPtr->publishingHouse);
+	free(bookPtr->shortDescription);
+	free(bookPtr);
+}
+
 // —равнивает числа, если они равны, возвращает 0, если первое больше второго - единицу, если наоборот - "-1"
 int compareNumbers(double first, double second) {
 	return first == second ? 0 : first > second ? 1 : -1;
@@ -165,12 +190,10 @@ treeNode* delete(treeNode* p, Book* bookPtr, enum searchTypes compareType) {
 				else previousStackNode->nextNode = currentStackNode->nextNode;
 
 				// ќчищаем текущую ноду
-				free(currentStackNode->currentBook);
 				free(currentStackNode);
 			}
 			// ≈сли в стеке один элемент (одна книга), то надо удал€ть вершину дерева полностью вместе со стеком
 			else {
-				free(p->stackTopPtr->currentBook);
 				free(p->stackTopPtr);
 
 				/* «апоминаем корни q и r левого и правого поддеревьев узла p; удал€ем узел p; если правое поддерево пустое,

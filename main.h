@@ -10,6 +10,8 @@
 
 // Кодировка для консоли, чтобы корректно выводились кириллические символы без дополнительных манипуляций
 #define RUS_ENCODING 1251
+// Количество полей в информации о книге, по которым может идти поиск
+#define SEARCH_FIELDS_NUMBER 7
 
 typedef struct _book {
 	char* title; // Название книги
@@ -53,5 +55,9 @@ void usage();
 treeNode* insert(treeNode* p, Book* bookPtr, enum searchTypes compareType);
 // Удаление книги, на которую указывает bookPtr, из указанного АВЛ-дерева с вершиной p
 treeNode* delete(treeNode* p, Book* bookPtr, enum searchTypes compareType);
+/*Удаление и добавление книги во все деревья. Для оптимизации скорости поиска деревьев всего семь штук - по количеству типов поиска 
+(searchTypes), каждое отсортировано по своему типу*/
+void insertInAllTrees(Book* bookPtr);
+void deleteFromAllTrees(Book* bookPtr);
 
 #endif // !LIBRARY_H
