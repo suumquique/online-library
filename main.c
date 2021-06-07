@@ -5,8 +5,29 @@ void main() {
 	SetConsoleCP(RUS_ENCODING);
 	SetConsoleOutputCP(RUS_ENCODING);
 
-	usage();
-	enum Actions { ADD, REMOVE, EDIT, SEARCH, SAVE, DOWNLOAD, PRINT_REFERNCE, EXIT };
+	/* ѕеречисление возможных действий с программой: добавление книги, удаление, редактирование, поиск и вывод, сохранение
+	в базу данных и загрузка из нее, вывод справки и выход из программы. — самого начала стоит в значении "ѕоказать справку",
+	чтобы пользователю при запуске как минимум один раз еЄ показало. */
+	enum Actions { ADD, REMOVE, EDIT, SEARCH, SAVE, DOWNLOAD, PRINT_REFERENCE, EXIT } action = PRINT_REFERENCE;
+	
+	while (action != EXIT) {
+		switch (action) {
+			case PRINT_REFERENCE:
+				usage();
+				break;
+			case EXIT:
+				exit(ERROR_SUCCESS);
+			default:
+				puts("¬ы указали несуществующее действие");
+				usage();
+				break;
+		}
+
+		printf(" акое действие выполнить следующим? > ");
+		scanf("%u", &action);
+		getchar();
+	}
+	
 }
 
 

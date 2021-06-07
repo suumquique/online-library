@@ -221,3 +221,17 @@ treeNode* delete(treeNode* p, Book* bookPtr, enum searchTypes compareType) {
 	
 	return balance(p);
 }
+
+bookStackNode* search(treeNode* p, Book* bookPtr, enum searchTypes searchType) {
+	if (!p) return NULL;
+
+	// —равнениваем текущую книгу из данной вершины дерева с значением параметра, по которому мы ищем
+	switch (compareBooks(p->stackTopPtr->currentBook, bookPtr, searchType)) {
+		case IS_EQUAL:
+			return p->stackTopPtr;
+		case FIRST_IS_SUPERIOR:
+			return search(p->left, bookPtr, searchType);
+		case SECOND_IS_SUPERIOR:
+			return search(p->right, bookPtr, searchType);
+	}
+}
