@@ -12,6 +12,8 @@
 #define RUS_ENCODING 1251
 // Количество полей в информации о книге, по которым может идти поиск
 #define SEARCH_FIELDS_NUMBER 7
+// Максимальная длина строки в символах в любом поле структуры Book
+#define MAX_FIELD_LENGTH 2000
 
 typedef struct _book {
 	char* title; // Название книги
@@ -69,5 +71,12 @@ bookStackNode* search(treeNode* p, Book* bookPtr, enum searchTypes searchType);
 void insertInAllTrees(Book* bookPtr);
 void deleteFromAllTrees(Book* bookPtr);
 
+/* Функция, с помощью которой пользователь может добавить новую книгу, заполнив все требуемые поля. 
+Возвращает указатель на новосозданную книгу. Гарантируется, что все строковые поля будут созданы динамически (malloc/calloc) */
+Book* createBook(void);
+
+/* Функция запрашивает у пользователя ввод строки (вопрос передается в inputString), считывает введенную пользователем строку,
+* выделяет под нее память оптимального размера, сохраняет туда строку и возвращает указатель на выделенную память */
+char* getUserStringPtr(char* inputString);
 
 #endif // !LIBRARY_H
