@@ -71,7 +71,7 @@ bookStackNode* search(treeNode* p, Book* bookPtr, enum searchTypes searchType);
 void insertInAllTrees(Book* bookPtr);
 void deleteFromAllTrees(Book* bookPtr);
 
-/* Функция, с помощью которой пользователь может добавить новую книгу, заполнив все требуемые поля. 
+/* Функция, с помощью которой пользователь может создать новую книгу, заполнив все требуемые поля. 
 Возвращает указатель на новосозданную книгу. Гарантируется, что все строковые поля будут созданы динамически (malloc/calloc) */
 Book* createBook(void);
 
