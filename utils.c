@@ -28,7 +28,12 @@ char* getUserStringPtr(char* inputString) {
 double getUserNumber(char* inputString) {
 	double number;
 	printf(inputString);
-	scanf("%lf", &number);
+	size_t scanned = scanf("%lf", &number);
+	if (scanned == 0) {
+		puts("\nОшибка считывания числа.\n");
+		return 0;
+	}
+
 	getchar();
 	putchar('\n');
 
