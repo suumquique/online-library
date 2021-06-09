@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="main.c" />
     <ClCompile Include="trees.c" />
+    <ClCompile Include="utils.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
