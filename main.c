@@ -44,6 +44,11 @@ void main() {
 				else puts("\nКнига успешно отредактирована.\n\n");
 				break; 
 			}
+			case SAVE: {
+				saveAllBooks(trees[0]);
+				puts("\nИнформация о всех книгах из библиотеки успешно записана в выходной файл.\n");
+				break;
+			}
 			case EXIT:
 				exit(ERROR_SUCCESS);
 			default:
@@ -311,10 +316,39 @@ DWORD editBook(void) {
 	if (needToEditField(fieldsToEdit, SEARCH_BY_SCORE)) 
 		editedBook->readersScore = (float) getUserNumber("Введите новую оценку книги читателями (от 0 до 10) > ");
 
+	// Поскольку строка с номерами полей для исправления нам больше не нужна, удаляем ее (очищаем память)
 	free(fieldsToEdit);
 
 	// Вставляем отредактированную книгу в дерево
 	insertInAllTrees(editedBook);
 
 	return ERROR_SUCCESS;
+}
+
+/* Сохраняет все книги из указанного дерева в указанный файл, считывая ноды с помощью алгоритма прямого обхода дерева.
+* Хотя конкретное дерево было бы удобнее восстанавливать из файла, если бы использовался обход в ширину, он сильно труднее в реализации,
+* и остальные шесть деревьев, отсортированные по другим полям, все равно придется строить с перебалансировками, поэтому это не имеет смысла */
+void saveBooksInPreOrderTravers(treeNode* root, FILE* outputFile) {
+	if (root != NULL) {
+		// Идем по текущему стеку книг в каждой ноде дерева и сохраняем все книги из стека в файл
+		for (bookStackNode* currentBookList = root->stackTopPtr; currentBookList != NULL; currentBookList = currentBookList->nextNode) {
+			Book* book = currentBookList->currentBook;
+			fprintf(outputFile, "%s\n%s\n%s\n%s\n%s\n%d\n%u\n%.1f\n|", book->title, book->author, book->genre,
+				book->publishingHouse, book->shortDescription, book->issueYear, book->price, book->readersScore);
+		}
+		saveBooksInPreOrderTravers(root->left, outputFile);
+		saveBooksInPreOrderTravers(root->right, outputFile);
+	}
+}
+
+void saveAllBooks(treeNode* top) {
+	char* outputFileName = getUserStringPtr("Введите путь к файлу, в который требуется сохранить имеющиеся в библиотеке книги > ");
+	FILE* outputFile = fopen(outputFileName, "a+");
+	saveBooksInPreOrderTravers(top, outputFile);
+	
+	// Очищаем память, выделенную под имя выходного файла, так как оно нам больше не нужно
+	free(outputFileName);
+
+	// Закрываем файл
+	fclose(outputFile);
 }

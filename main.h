@@ -102,4 +102,8 @@ double getUserNumber(char* inputString);
 // Преобразует цифру типа int в ту же цифру типа char (в виде символа)
 char intToChar(int digit);
 
+/* Сохраняет все книги из онлайн-библиотеки (определенного дерева, но в любом дереве хранятся все книги) в файл и 
+возвращает код выполнения. Если ошибки нет, возвращает ERROR_SUCCES */
+void saveAllBooks(treeNode* top);
+
 #endif // !LIBRARY_H
