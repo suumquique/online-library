@@ -8,13 +8,13 @@ treeNode* trees[7] = { 0 };
 
 void insertInAllTrees(Book* bookPtr) {
 	for (size_t searchType = 0; searchType < SEARCH_FIELDS_NUMBER; searchType++) {
-		insert(trees[searchType], bookPtr, searchType);
+		trees[searchType] = insert(trees[searchType], bookPtr, searchType);
 	}
 }
 
 void deleteFromAllTrees(Book* bookPtr) {
 	for (size_t searchType = 0; searchType < SEARCH_FIELDS_NUMBER; searchType++) {
-		delete(trees[searchType], bookPtr, searchType);
+		trees[searchType] = delete(trees[searchType], bookPtr, searchType);
 	}
 
 	free(bookPtr->author);
