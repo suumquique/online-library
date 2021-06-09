@@ -114,11 +114,21 @@ treeNode* insert(treeNode* p, Book* bookPtr, enum searchTypes compareType) {
 	if (!p) {
 		// Создаем новый стек для книг, туда добавляем одну книгу, указатель на следующий элемент стека пустой
 		bookStackNode* newStackTop = (bookStackNode*)calloc(1, sizeof(bookStackNode));
+		if (newStackTop == NULL) {
+			puts("\nНевозможно добавить книгу в стек новой ноды: недостаточно памяти\n");
+			return NULL;
+		}
+
 		newStackTop->currentBook = bookPtr;
 		newStackTop->nextNode = NULL;
 
 		// Создаем вершину (ноду) дерева, туда добавляем указатель на созданный нами ранее стек. Устанавливаем высоту данной вершины по умолчанию
 		treeNode* newNode = (treeNode*)calloc(1, sizeof(treeNode));
+		if (newNode == NULL) {
+			puts("\nОшибка при добавлении ноды в дерево: недостаточно памяти для выделения\n");
+			return NULL;
+		}
+
 		newNode->height = 1;
 		newNode->stackTopPtr = newStackTop;
 		newNode->left = newNode->right = NULL;
@@ -132,6 +142,11 @@ treeNode* insert(treeNode* p, Book* bookPtr, enum searchTypes compareType) {
 		case IS_EQUAL:
 		{
 			bookStackNode* newStackTop = (bookStackNode*)calloc(1, sizeof(bookStackNode));
+			if (newStackTop == NULL) {
+				puts("\nНевозможно добавить книгу в стек: недостаточно памяти\n");
+				break;
+			}
+
 			newStackTop->currentBook = bookPtr;
 			newStackTop->nextNode = p->stackTopPtr;
 			p->stackTopPtr = newStackTop;

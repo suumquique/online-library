@@ -75,6 +75,10 @@ Book* createBook() {
 	puts("Так, вы создаете страницу с информацией о новой книге. Давайте выполним пару простых шагов: \n");
 
 	Book* newBook = (Book*) calloc(1, sizeof(Book));
+	if (newBook == NULL) {
+		puts("Ошибка создания книги: недостаточно памяти\n");
+		return NULL;
+	}
 
 	newBook->title = getUserStringPtr("1. Введите название книги > ");
 	newBook->author = getUserStringPtr("2. Укажите автора добавляемой книги > ");
@@ -124,6 +128,10 @@ Book* searchBook(void) {
 	* для универсальности при поиске по любому из полей структуры книги принимает в качестве аргумента целую книгу и сравнивает нужное поле
 	* с книгами в дереве для поиска книг с аналогичным полем */
 	Book* searchBook = (Book*)calloc(1, sizeof(Book));
+	if (searchBook == NULL) {
+		puts("\nОшибка создания экземляра книги для поиска: недостаточно памяти.\n");
+		return NULL;
+	}
 
 	switch (searchType) {
 	case SEARCH_BY_AUTHOR:
@@ -313,7 +321,10 @@ DWORD editBook(void) {
 
 char* getUserStringPtr(char* inputString) {
 	char* temp = (char*)malloc(MAX_FIELD_LENGTH * sizeof(char));
-
+	if (temp == NULL) {
+		puts("Недостаточно памяти в куче для выделения временной строки для пользовательского ввода");
+		return NULL;
+	}
 	printf(inputString);
 	gets_s(temp, MAX_FIELD_LENGTH);
 	// Выведем перенос строки после считывания
@@ -322,7 +333,10 @@ char* getUserStringPtr(char* inputString) {
 	// Получаем длину введенной пользователем строки и создаем под нее массив размеров в это число символов (для экономии памяти)
 	size_t sLen = strlen(temp);
 	char* resultString = (char*)malloc((sLen + 1) * sizeof(char));
-
+	if (resultString == NULL) {
+		puts("Недостаточно свободной памяти в куче для выделения строки для пользовательского ввода");
+		return NULL;
+	}
 	strcpy(resultString, temp);
 	// Не забываем очистить память, выделенную под тестовую строку
 	free(temp);
