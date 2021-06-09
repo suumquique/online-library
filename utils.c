@@ -26,11 +26,13 @@ char* getUserStringPtr(char* inputString) {
 }
 
 double getUserNumber(char* inputString) {
-	double number;
+	double number = 0.0;
 	printf(inputString);
 	size_t scanned = scanf("%lf", &number);
 	if (scanned == 0) {
 		puts("\nОшибка считывания числа.\n");
+		// Очищаем поток
+		while (getchar() != '\n');
 		return 0;
 	}
 
