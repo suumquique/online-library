@@ -20,6 +20,21 @@ void main() {
 			case ADD: {
 				Book* newBookPtr = createBook(); 
 				insertInAllTrees(newBookPtr);
+				puts("\nКнига успешно сохранена в библиотеку\n\n");
+				break;
+			}
+			case SEARCH: {
+				Book* searchedBookPtr = searchBook();
+				puts("Информация о книге, которую вы искали:\n");
+				printBook(searchedBookPtr);
+				break;
+			}
+			case REMOVE: {
+				puts("\t\t\t\t  Сначала найдем книгу, которую будем удалять.  \t\t\t\t \n");
+				Book* bookToRemovePtr = searchBook();
+				deleteFromAllTrees(bookToRemovePtr);
+				puts("Книга успешно удалена из библиотеки!\n");
+				break;
 			}
 			case EXIT:
 				exit(ERROR_SUCCESS);
@@ -29,10 +44,7 @@ void main() {
 				break;
 		}
 
-		printf("Какое действие выполнить следующим? > ");
-		scanf("%u", &action);
-		getchar();
-		putchar('\n');
+		action = getUserNumber("Какое действие выполнить следующим? > ");
 	}
 	
 }
@@ -57,29 +69,124 @@ Book* createBook() {
 	Book* newBook = (Book*) calloc(1, sizeof(Book));
 	newBook->title = getUserStringPtr("1. Введите название книги > ");
 	newBook->author = getUserStringPtr("2. Укажите автора добавляемой книги > ");
-	newBook->publishingHouse = getUserStringPtr("3. Укажите, какое издательство выпустило книгу >");
+	newBook->publishingHouse = getUserStringPtr("3. Укажите, какое издательство выпустило книгу > ");
 	newBook->genre = getUserStringPtr("4. Укажите жанр книги > ");
 	newBook->shortDescription = getUserStringPtr("5. Напишите краткое описание сюжета к добавляемой книге > ");
-
-	printf("6. Введите цену книги в рублях (число, без дополнительных обозначений) > ");
-	scanf("%u", &(newBook->price));
-	getchar();
-	putchar('\n');
-	
-	printf("7. Введите информацию о годе написания книги (целое число, если до нашей эры - вводить со знаком минус) > ");
-	scanf("%d", &(newBook->issueYear));
-	getchar();
-	putchar('\n');
-
-	printf("8. Введите оценку книги читателями (по шкале от 0 до 10, дробные оценки допустимы) > ");
-	scanf("%f", &(newBook->readersScore));
-	getchar();
-	putchar('\n');
+	newBook->price = (unsigned) getUserNumber("6. Введите цену книги в рублях (число, без дополнительных обозначений) > ");
+	newBook->issueYear = (int) getUserNumber("7. Введите информацию о годе написания книги (целое число, если до нашей эры - вводить со знаком минус) > ");
+	newBook->readersScore = (float) getUserNumber("8. Введите оценку книги читателями (по шкале от 0 до 10, дробные оценки допустимы) > ");
 
 	// Ставим уникальный id и увеличиваем глобальную переменную, чтобы у следующей книги был другой id
 	newBook->id = id++;
 
 	return newBook;
+}
+
+Book* searchBook(void) {
+	
+	enum searchTypes searchType;
+
+	printf("\t-------Перед началом поиска требуется определить, по какому полю в информации о книге искать--------\n"
+		"\t|                                                                                                  |\n"
+		"\t| 1. Искать по названию книги                                                                      |\n"
+		"\t| 2. Искать по автору книги                                                                        |\n"
+		"\t| 3. Искать по году написания книги                                                                |\n"
+		"\t| 4. Найти книгу по цене в рублях (целое число)                                                    |\n"
+		"\t| 5. Найти книгу по жанру                                                                          |\n"
+		"\t| 6. Найти книгу по оценкам читателей (возможны дробные, от 0 до 10)                               |\n"
+		"\t| 7. Найти книгу по названию издательства                                                          |\n"
+		"\t|                                                                                                  |\n"
+		"\t----------------------------------------------------------------------------------------------------\n\n");
+
+	// Переменная, в которую запишется выбор пользователя (по какому полю в структуре книги искать)
+	unsigned choice = (unsigned) getUserNumber("Введите цифру из таблице выше для поиска по определенному полю > ");
+
+	// Если введен некорректный пункт, говорим пользователю об ошибке и спрашиваем его еще раз
+	if (choice < 1 || choice > 7) {
+		puts("Вы указали несуществующий параметр поиска. Попробуйте ещё раз.");
+		return searchBook();
+	}
+
+	// Поскольку нумерация в searchTypes идет с нуля, а выбор - с единицы, вычитаем единицу
+	searchType = choice - 1;
+	putchar('\n');
+
+	/* Создаем пустой экземпляр книги для поиска. Суть в том, что функция search, которая работает напрямую с выбранным деревом,
+	* для универсальности при поиске по любому из полей структуры книги принимает в качестве аргумента целую книгу и сравнивает нужное поле
+	* с книгами в дереве для поиска книг с аналогичным полем */
+	Book* searchBook = (Book*)calloc(1, sizeof(Book));
+
+	switch (searchType) {
+	case SEARCH_BY_AUTHOR:
+		searchBook->author = getUserStringPtr("Введите автора искомой книги > ");
+		break;
+	case SEARCH_BY_GENRE:
+		searchBook->genre = getUserStringPtr("Введите жанр для поиска > ");
+		break;
+	case SEARCH_BY_TITLE:
+		searchBook->title = getUserStringPtr("Введите название искомой книги > ");
+		break;
+	case SEARCH_BY_PUBLISHING_HOUSE:
+		searchBook->publishingHouse = getUserStringPtr("Введите название издательства для поиска > ");
+		break;
+	case SEARCH_BY_PRICE: {
+		searchBook->price = (unsigned)getUserNumber("Введите цену книги в рублях для поиска (число, без дополнительных обозначений) > ");
+		break;
+	}
+	case SEARCH_BY_SCORE: {
+		searchBook->readersScore = getUserNumber("Введите оценку книги читателями для поиска (по шкале от 0 до 10, дробные оценки допустимы) > ");
+		break;
+	}
+	case SEARCH_BY_YEAR: {
+		searchBook->issueYear = (int)getUserNumber("Введите год написания книги для поиска (целое число, если до нашей эры - вводить со знаком минус) > ");
+		break;
+	}
+	default:
+		puts("Неизвестная ошибка при поиске");
+		return NULL;
+	}
+
+	// Ищем по требуемому дереву и в качестве ответа получаем ссылку на вершину стека с подходящими под наш запрос книгами
+	bookStackNode* searchResultStack = search(trees[searchType], searchBook, searchType);
+
+	// Очистка книги поиска после выполнения поиска
+	if (searchBook->author != NULL) free(searchBook->author);
+	else if (searchBook->genre != NULL) free(searchBook->genre);
+	else if (searchBook->title != NULL) free(searchBook->title);
+	else if (searchBook->publishingHouse != NULL) free(searchBook->publishingHouse);
+
+	// Поля с числовыми значениями освобождать не надо, поэтому можем удалять сам экземпляр книги (структуру)
+	free(searchBook);
+
+	// Если книга не нашлась, выдаем сообщение об ошибке
+	if (searchResultStack == NULL) {
+		puts("К сожалению, ничего на нашлось (");
+		return NULL;
+	}
+
+	// Если нашлась только одна книга, сразу же возвращаем ее
+	if (searchResultStack->nextNode == NULL) {
+		return searchResultStack->currentBook;
+	}
+
+	// Во всех иных случаях в стеке больше чем одна книга, а следовательно нужно вывести все
+	puts("\nСписок книг, найденных по вашему запросу: \n");
+	for (bookStackNode* currentStackElement = searchResultStack; currentStackElement != NULL; currentStackElement = currentStackElement->nextNode) {
+		printBook(currentStackElement->currentBook);
+	}
+
+	unsigned searchedID = getUserNumber("Введите id искомой книги(из представленного выше списка книг) > ");
+	for (bookStackNode* currentStackElement = searchResultStack; ; currentStackElement = currentStackElement->nextNode) {
+		if (currentStackElement == NULL) {
+			puts("Вы указали несуществующий id книги\n");
+			return NULL;
+		}
+
+		// Если мы дошли до книги с введенным пользователем id, возвращаем ее
+		if (currentStackElement->currentBook->id == searchedID) {
+			return currentStackElement->currentBook;
+		}
+	};
 }
 
 char* getUserStringPtr(char* inputString) {
@@ -97,4 +204,31 @@ char* getUserStringPtr(char* inputString) {
 	free(temp);
 
 	return resultString;
+}
+
+double getUserNumber(char* inputString) {
+	double number;
+	printf(inputString);
+	scanf("%lf", &number);
+	getchar();
+	putchar('\n');
+
+	return number;
+}
+
+void printBook(Book* bookPtr) {
+	if (bookPtr == NULL) return;
+
+	printf("\nНазвание книги: %s                                                                                 \n"
+		"Автор книги: %s                                                                                    \n"
+		"Жанр произведения: %s                                                                              \n"
+		"Год написания: %d                                                                                  \n"
+		"Издательство: %s                                                                                   \n"
+		"Оценка читателей: %.1f                                                                               \n"
+		"Цена книги: %u                                                                                     \n"
+		"Краткое описание сюжета: %s                                                                        \n\n"
+		"ID книги: %u                                                                                       \n\n"
+		"----------------------------------------------------------------------------------------------------\n\n",
+		bookPtr->title, bookPtr->author, bookPtr->genre, bookPtr->issueYear, bookPtr->publishingHouse, bookPtr->readersScore,
+		bookPtr->price, bookPtr->shortDescription, bookPtr->id);
 }
