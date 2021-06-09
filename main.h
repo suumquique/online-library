@@ -48,7 +48,8 @@ extern treeNode* trees[7];
 
 /* Поскольку для быстрого поиска и вставки хранение информации о каждой книге осуществляется в разных деревьях, пользователю нужно будет 
 выбрать, по какому из параметров он ищет книгу (название, автор, год выпуска и так далее) */
-enum searchTypes {SEARCH_BY_TITLE, SEARCH_BY_AUTHOR, SEARCH_BY_YEAR, SEARCH_BY_PRICE, SEARCH_BY_GENRE, SEARCH_BY_SCORE, SEARCH_BY_PUBLISHING_HOUSE};
+enum searchTypes {SEARCH_BY_TITLE, SEARCH_BY_AUTHOR, SEARCH_BY_YEAR, SEARCH_BY_PRICE, SEARCH_BY_GENRE, 
+	SEARCH_BY_SCORE, SEARCH_BY_PUBLISHING_HOUSE, SEARCH_BY_SHORT_DESCRIPTION};
 // Результаты сравнения книг функциями в удобочитаемом виде
 enum compareResults {SECOND_IS_SUPERIOR = -1, IS_EQUAL, FIRST_IS_SUPERIOR};
 
@@ -83,6 +84,11 @@ Book* createBook(void);
 пользователем. */
 Book* searchBook(void);
 
+/*Функция, с помощью которой можно отредактировать определенную книгу в библиотеке. Поскольку при редактировании одного или нескольких 
+информационных полей требуется перебалансировать соответствующие деревья, книга сначала должна быть удалена изо всех деревьев, отредактирована
+и затем добавлена снова. Функция возвращает код выполнения, если все успешно - ERROR_SUCCESS. */
+DWORD editBook(void);
+
 // Функция принимает один аргумент - указатель на книгу, и выводит всю информацию о книге в консоль в удобном виде
 void printBook(Book* bookPtr);
 
@@ -92,5 +98,8 @@ char* getUserStringPtr(char* inputString);
 
 // Функция запрашивает у пользователя ввод числа, считывает его, сохраняет, переводит строку после считывания и возвращает число 
 double getUserNumber(char* inputString);
+
+// Преобразует цифру типа int в ту же цифру типа char (в виде символа)
+char intToChar(int digit);
 
 #endif // !LIBRARY_H

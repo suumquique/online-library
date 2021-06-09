@@ -36,6 +36,14 @@ void main() {
 				puts("Книга успешно удалена из библиотеки!\n");
 				break;
 			}
+			case EDIT: {
+				DWORD retCode = editBook();
+				if (retCode != ERROR_SUCCESS) {
+					puts("\nОшибка редактирования книги.\n\n");
+				}
+				else puts("\nКнига успешно отредактирована.\n\n");
+				break; 
+			}
 			case EXIT:
 				exit(ERROR_SUCCESS);
 			default:
@@ -67,6 +75,7 @@ Book* createBook() {
 	puts("Так, вы создаете страницу с информацией о новой книге. Давайте выполним пару простых шагов: \n");
 
 	Book* newBook = (Book*) calloc(1, sizeof(Book));
+
 	newBook->title = getUserStringPtr("1. Введите название книги > ");
 	newBook->author = getUserStringPtr("2. Укажите автора добавляемой книги > ");
 	newBook->publishingHouse = getUserStringPtr("3. Укажите, какое издательство выпустило книгу > ");
@@ -189,8 +198,122 @@ Book* searchBook(void) {
 	};
 }
 
+/* Функция, проверяющая, требуется ли редактировать определенное поле книги. 
+Принимает в качестве параметров строку, в которой указаны номера редактируемых полей, и проверяемое поле */
+bool needToEditField(char* stringWithFieldsToEdit, enum searchTypes fieldType) {
+	return strchr(stringWithFieldsToEdit, intToChar(fieldType + 1)) != NULL;
+}
+
+DWORD editBook(void) {
+	puts("\t\t\t\t  Сначала найдем книгу, которую будем редактировать.  \t\t\t\t \n");
+	Book* bookToEdit = searchBook();
+
+	// Если книга не нашлась, возвращаем ошибку
+	if (bookToEdit == NULL) {
+		puts("К сожалению, отредактировать несуществующую книгу нельзя.\n");
+		return ERROR_NODE_NOT_AVAILABLE;
+	}
+	else printBook(bookToEdit);
+
+	// Создаем экземляр книги, которую будем редактировать, и копируем в неё информацию всех полей редактируемой книги
+	Book* editedBook = (Book*)malloc(sizeof(Book));
+	if (editedBook == NULL) {
+		puts("Недостаточно памяти для создания нового экземляра книги");
+		return ERROR_NOT_ENOUGH_MEMORY;
+	}
+	memcpy(editedBook, bookToEdit, sizeof(Book));
+	char* authorCopy = (char*) malloc((strlen(bookToEdit->author) + 1) * sizeof(char));
+	char* titleCopy = (char*) malloc((strlen(bookToEdit->title) + 1) * sizeof(char));
+	char* genreCopy = (char*) malloc((strlen(bookToEdit->genre) + 1) * sizeof(char));
+	char* publishingHouseCopy = (char*) malloc((strlen(bookToEdit->publishingHouse) + 1) * sizeof(char));
+	char* shortDescriptionCopy = (char*)malloc((strlen(bookToEdit->shortDescription) + 1) * sizeof(char));
+	if (authorCopy == NULL || titleCopy == NULL || publishingHouseCopy == NULL || shortDescriptionCopy == NULL || genreCopy == NULL) {
+		puts("Недостаточно памяти для заполнения полей отредактированной книги");
+		return ERROR_NOT_ENOUGH_MEMORY;
+	}
+	strcpy(authorCopy, bookToEdit->author);
+	strcpy(titleCopy, bookToEdit->title);
+	strcpy(genreCopy, bookToEdit->genre);
+	strcpy(publishingHouseCopy, bookToEdit->publishingHouse);
+	strcpy(shortDescriptionCopy, bookToEdit->shortDescription);
+	editedBook->author = authorCopy;
+	editedBook->title = titleCopy;
+	editedBook->genre = genreCopy;
+	editedBook->publishingHouse = publishingHouseCopy;
+	editedBook->shortDescription = shortDescriptionCopy;
+
+	// Удаляем полученную книгу, так как у нас уже есть копия, которую мы будем редактировать
+	deleteFromAllTrees(bookToEdit);
+
+	puts("\nТеперь перейдем к редактированию выбранной книги.\n");
+
+	printf("\t----------------------------------------------------------------------------------------------------\n"
+		"\t|                     Сначала определим, какие поля требуется редактировать.                       |\n"
+		"\t|     Для редактирования нескольких полей одновременно укажите несколько чисел (например, 145)     |\n"
+		"\t|                                                                                                  |\n"
+		"\t| 1. Отредактировать название книги                                                                |\n"
+		"\t| 2. Отредактировать автора книги                                                                  |\n"
+		"\t| 3. Отредактировать год написания книги                                                           |\n"
+		"\t| 4. Отредактировать цену книги                                                                    |\n"
+		"\t| 5. Отредактировать жанр книги                                                                    |\n"
+		"\t| 6. Отредактировать оценку книги читателями                                                       |\n"
+		"\t| 7. Отредактировать название издательства книги                                                   |\n"
+		"\t| 8. Отредактировать краткое описание книги                                                        |\n"
+		"\t|                                                                                                  |\n"
+		"\t----------------------------------------------------------------------------------------------------\n\n");
+
+	char* fieldsToEdit = getUserStringPtr("Введите цифры, соответствующие полям, которые вы собираетесь редактировать > ");
+
+	if (needToEditField(fieldsToEdit, SEARCH_BY_TITLE)) {
+		char* newTitle = getUserStringPtr("Введите отредактированное (обновленное) название книги > ");
+		free(editedBook->title);
+		editedBook->title = newTitle;
+	}
+
+	if (needToEditField(fieldsToEdit, SEARCH_BY_AUTHOR)) {
+		char* newAuthor = getUserStringPtr("Корректно введите нового автора книги > ");
+		free(editedBook->author);
+		editedBook->author = newAuthor;
+	}
+
+	if (needToEditField(fieldsToEdit, SEARCH_BY_GENRE)) {
+		char* newGenre = getUserStringPtr("Введит исправленный (новый) жанр книги > ");
+		free(editedBook->genre);
+		editedBook->genre = newGenre;
+	}
+
+	if (needToEditField(fieldsToEdit, SEARCH_BY_PUBLISHING_HOUSE)) {
+		char* newPublishingHouse = getUserStringPtr("Введите корректное (новое) название издательства > ");
+		free(editedBook->publishingHouse);
+		editedBook->publishingHouse = newPublishingHouse;
+	}
+
+	if (needToEditField(fieldsToEdit, SEARCH_BY_SHORT_DESCRIPTION)) {
+		char* newShortDescription = getUserStringPtr("Введите новое краткое описание книги > ");
+		free(editedBook->shortDescription);
+		editedBook->shortDescription = newShortDescription;
+	}
+
+	if (needToEditField(fieldsToEdit, SEARCH_BY_PRICE)) 
+		editedBook->price = (unsigned) getUserNumber("Введите новую цену книги > ");
+
+	if (needToEditField(fieldsToEdit, SEARCH_BY_YEAR)) 
+		editedBook->issueYear = (int) getUserNumber("Введите исправленный год выхода книги > ");
+
+	if (needToEditField(fieldsToEdit, SEARCH_BY_SCORE)) 
+		editedBook->readersScore = (float) getUserNumber("Введите новую оценку книги читателями (от 0 до 10) > ");
+
+	free(fieldsToEdit);
+
+	// Вставляем отредактированную книгу в дерево
+	insertInAllTrees(editedBook);
+
+	return ERROR_SUCCESS;
+}
+
 char* getUserStringPtr(char* inputString) {
 	char* temp = (char*)malloc(MAX_FIELD_LENGTH * sizeof(char));
+
 	printf(inputString);
 	gets_s(temp, MAX_FIELD_LENGTH);
 	// Выведем перенос строки после считывания
@@ -199,6 +322,7 @@ char* getUserStringPtr(char* inputString) {
 	// Получаем длину введенной пользователем строки и создаем под нее массив размеров в это число символов (для экономии памяти)
 	size_t sLen = strlen(temp);
 	char* resultString = (char*)malloc((sLen + 1) * sizeof(char));
+
 	strcpy(resultString, temp);
 	// Не забываем очистить память, выделенную под тестовую строку
 	free(temp);
@@ -231,4 +355,8 @@ void printBook(Book* bookPtr) {
 		"----------------------------------------------------------------------------------------------------\n\n",
 		bookPtr->title, bookPtr->author, bookPtr->genre, bookPtr->issueYear, bookPtr->publishingHouse, bookPtr->readersScore,
 		bookPtr->price, bookPtr->shortDescription, bookPtr->id);
+}
+
+char intToChar(int digit) {
+	return '0' + ((digit > 0 && digit < 10) ? digit : 0);
 }
