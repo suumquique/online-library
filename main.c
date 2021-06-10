@@ -92,7 +92,13 @@ Book* createBook() {
 	newBook->shortDescription = getUserStringPtr("5. Напишите краткое описание сюжета к добавляемой книге > ");
 	newBook->price = (unsigned) getUserNumber("6. Введите цену книги в рублях (число, без дополнительных обозначений) > ");
 	newBook->issueYear = (int) getUserNumber("7. Введите информацию о годе выпуска книги (целое число, если до нашей эры - вводить со знаком минус) > ");
-	newBook->readersScore = (float) getUserNumber("8. Введите оценку книги читателями (по шкале от 0 до 10, дробные оценки допустимы) > ");
+	float readersScore = (float)getUserNumber("8. Введите оценку книги читателями (по шкале от 0 до 10, дробные оценки допустимы) > ");
+	while (readersScore < 0 || readersScore > 10) {
+		readersScore =
+			(float)getUserNumber("Вы ввели некорректное число. Введите оценку книги читателями (по шкале от 0 до 10, дробные оценки допустимы) > ");
+	}
+	newBook->readersScore = readersScore;
+
 
 	// Ставим уникальный id и увеличиваем глобальную переменную, чтобы у следующей книги был другой id
 	newBook->id = id++;
@@ -313,8 +319,15 @@ DWORD editBook(void) {
 	if (needToEditField(fieldsToEdit, SEARCH_BY_YEAR)) 
 		editedBook->issueYear = (int) getUserNumber("Введите исправленный год выхода книги > ");
 
-	if (needToEditField(fieldsToEdit, SEARCH_BY_SCORE)) 
-		editedBook->readersScore = (float) getUserNumber("Введите новую оценку книги читателями (от 0 до 10) > ");
+	if (needToEditField(fieldsToEdit, SEARCH_BY_SCORE)) {
+		float readersScore = (float) getUserNumber("Введите новое значение оценки книги читателями (по шкале от 0 до 10, дробные оценки допустимы) > ");
+		while (readersScore < 0 || readersScore > 10) {
+			readersScore =
+				(float) getUserNumber("Вы ввели некорректное число. Введите оценку книги читателями (по шкале от 0 до 10, дробные оценки допустимы) > ");
+		}
+		editedBook->readersScore = readersScore;
+	}
+		
 
 	// Поскольку строка с номерами полей для исправления нам больше не нужна, удаляем ее (очищаем память)
 	free(fieldsToEdit);
