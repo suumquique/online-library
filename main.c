@@ -44,9 +44,16 @@ void main() {
 				else puts("\nКнига успешно отредактирована.\n\n");
 				break; 
 			}
-			case SAVE: {
+			case SAVE: 
 				saveAllBooks(trees[0]);
 				puts("\nИнформация о всех книгах из библиотеки успешно записана в выходной файл.\n");
+				break;
+			case DOWNLOAD: {
+				DWORD retCode = loadBooksFromDatabase();
+				if (retCode != ERROR_SUCCESS) {
+					puts("\nОшибка загрузки базы данных.\n\n");
+				}
+				else puts("\nВсе книги из базы данных успещно загружены в библиотеку.\n\n");
 				break;
 			}
 			case EXIT:
@@ -346,22 +353,75 @@ void saveBooksInPreOrderTravers(treeNode* root, FILE* outputFile) {
 		// Идем по текущему стеку книг в каждой ноде дерева и сохраняем все книги из стека в файл
 		for (bookStackNode* currentBookList = root->stackTopPtr; currentBookList != NULL; currentBookList = currentBookList->nextNode) {
 			Book* book = currentBookList->currentBook;
-			fprintf(outputFile, "%s\n%s\n%s\n%s\n%s\n%d\n%u\n%.1f\n|", book->title, book->author, book->genre,
+			fprintf(outputFile, "%s\n%s\n%s\n%s\n%s\n%d\n%u\n%.1f\n|\n", book->title, book->author, book->genre,
 				book->publishingHouse, book->shortDescription, book->issueYear, book->price, book->readersScore);
 		}
+
+		// Рекурсивно заходим в правую и левую ветви
 		saveBooksInPreOrderTravers(root->left, outputFile);
 		saveBooksInPreOrderTravers(root->right, outputFile);
 	}
 }
 
 void saveAllBooks(treeNode* top) {
-	char* outputFileName = getUserStringPtr("Введите путь к файлу, в который требуется сохранить имеющиеся в библиотеке книги > ");
+	char* outputFileName = getUserStringPtr("\nВведите путь к файлу, в который требуется сохранить имеющиеся в библиотеке книги > ");
 	FILE* outputFile = fopen(outputFileName, "a+");
 	saveBooksInPreOrderTravers(top, outputFile);
 	
 	// Очищаем память, выделенную под имя выходного файла, так как оно нам больше не нужно
 	free(outputFileName);
 
-	// Закрываем файл
 	fclose(outputFile);
+}
+
+DWORD loadBooksFromDatabase(void) {
+	char* databaseFileName = getUserStringPtr("\nВведите путь к файлу, в котором находится база данных с книгами > ");
+	FILE* databaseFile = fopen(databaseFileName, "r");
+	if (databaseFile == NULL) {
+		puts("Ошибка: Файла по указанному пути не существует, либо доступ к нему запрещён.\n");
+		return ERROR_FILE_INVALID;
+	}
+
+	// Переводим указатель на конец файла
+	fseek(databaseFile, 0, SEEK_END);
+	// Узнаем длину текста в файле по позиции указателя, так как он находится в конце файла
+	size_t fileSizeInBytes = ftell(databaseFile) + 1;
+	// Возвращаем указатель назад в начало файла
+	rewind(databaseFile);
+
+	while (!feof(databaseFile)) {
+		Book* currentBook = (Book*)malloc(sizeof(Book));
+		if (currentBook == NULL) {
+			puts("\nОшибка: недостаточно памяти для сохранения всех книг из файла в программу.\n");
+			return ERROR_NOT_ENOUGH_MEMORY;
+		}
+
+		currentBook->title = getStringFromFile(databaseFile);
+		currentBook->author = getStringFromFile(databaseFile);
+		currentBook->genre = getStringFromFile(databaseFile);
+		currentBook->publishingHouse = getStringFromFile(databaseFile);
+		currentBook->shortDescription = getStringFromFile(databaseFile);
+
+		if (currentBook->title == NULL || currentBook->author == NULL || currentBook->genre == NULL ||
+			currentBook->publishingHouse == NULL || currentBook->shortDescription == NULL) {
+			puts("\nОшибка: одно или несколько полей книги недоступно для считывания.\n");
+			return ERROR_READ_FAULT;
+		}
+
+		size_t scanned = fscanf(databaseFile, "%d\n%u\n%f\n|\n",  &currentBook->issueYear, &currentBook->price, &currentBook->readersScore);
+		if (scanned != 3) {
+			printf("\nОшибка считывания: на текущей итерации удалось считать лишь %u переменных из файла.\n", scanned);
+			return ERROR_READ_FAULT;
+		}
+
+		currentBook->id = id++;
+
+		insertInAllTrees(currentBook);
+	}
+	
+	
+	free(databaseFileName);
+	fclose(databaseFile);
+
+	return ERROR_SUCCESS;
 }

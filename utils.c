@@ -62,3 +62,38 @@ void printBook(Book* bookPtr) {
 char intToChar(int digit) {
 	return '0' + ((digit > 0 && digit < 10) ? digit : 0);
 }
+
+char* getStringFromFile(FILE* inputFile) {
+	// Временная переменная для сохранения строк, считанных из файла
+	char* temp = (char*)malloc((MAX_FIELD_LENGTH + 1) * sizeof(char));
+	if (temp == NULL) {
+		puts("\nОшибка: недостаточно памяти для сохранения полей книги из файла.\n");
+		return NULL;
+	}
+
+	// Считываем строку из файла во временную переменную
+	fgets(temp, MAX_FIELD_LENGTH, inputFile);
+
+	// Если после считывания строки в temp он равен NULL
+	if (temp == NULL) {
+		puts("\nОшибка: неудача при считывании файла или достигнут конец файла.\n");
+		return NULL;
+	}
+
+
+	// Получаем длину считанной из файла строки и создаем под нее массив размеров в это число символов (для экономии памяти)
+	size_t sLen = strlen(temp);
+	// Удаляем считанный символ переноса строки и заменяем его на символ конца строки
+	temp[sLen - 1] = '\0';
+
+	char* resultString = (char*)malloc(sLen * sizeof(char));
+	if (resultString == NULL) {
+		puts("Недостаточно свободной памяти в куче для выделения строки для пользовательского ввода");
+		return NULL;
+	}
+	strcpy(resultString, temp);
+	// Не забываем очистить память, выделенную под тестовую строку
+	free(temp);
+
+	return resultString;
+}
